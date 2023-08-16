@@ -1,16 +1,12 @@
+import { QuizList } from './QuizList/QuizList';
+import quizItems from '../data.json';
+import { SearchBar } from './Searchbar/SearchBar';
+
 export const App = () => {
   return (
-    <div
-      style={{
-        height: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        fontSize: 40,
-        color: '#010101'
-      }}
-    >
-      React homework template
-    </div>
+    <>
+      <SearchBar />
+      <QuizList items={quizItems} />
+    </>
   );
 };

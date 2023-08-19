@@ -20,10 +20,11 @@ const getBorderColor = ({ theme, level }) => {
 };
 
 export const ListItem = styled.li`
+  flex-basis: calc((100% - 32px) / 3);
   border: 2px solid ${getBorderColor};
   border-radius: 4px;
 
-  :hover {
+  /* :hover {
     background-color: tomato;
-  }
+  } */
 `;

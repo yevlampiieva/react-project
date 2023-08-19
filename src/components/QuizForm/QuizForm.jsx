@@ -1,5 +1,5 @@
 import { Formik } from 'formik';
-import * as Yup from 'yup';
+// import * as Yup from 'yup';
 import { StyledForm, StyledField, Label } from './QuizForm.styled';
 
 export const QuizForm = () => {

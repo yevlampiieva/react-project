@@ -1,4 +1,4 @@
-import { QuizCard } from 'components/QuizCard/QuizCard';
+import { QuizCard } from '../QuizCard/QuizCard';
 import { List, ListItem } from './QuizList.styled';
 
 export const QuizList = ({ items, onDelete }) => {

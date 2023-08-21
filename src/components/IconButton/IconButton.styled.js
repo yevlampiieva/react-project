@@ -17,9 +17,7 @@ const btnSize = {
   lg: 48,
 };
 
-const getSize = props => {
-  return `${btnSize[props.size]}px`;
-};
+const getSize = props => `${btnSize[props.size]}px`;
 
 export const Button = styled.button`
   margin: 0;
@@ -32,6 +30,7 @@ export const Button = styled.button`
   color: ${props => (props.variant === 'primary' ? 'red' : 'blue')};
 
   svg {
+    display: block;
     width: 100%;
     height: 100%;
   }

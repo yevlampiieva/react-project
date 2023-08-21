@@ -8,11 +8,17 @@ export const Wrapper = styled.div`
 
 export const Topic = styled.h2`
   margin-top: 0;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   font-weight: 500;
 `;
 
 export const Text = styled.p`
-  margin-top: 0;
-  margin-bottom: 8px;
+  margin: 0;
+`;
+
+export const Meta = styled.div`
+  display: flex;
+  gap: 4px;
+  justify-content: space-between;
+  margin-bottom: 12px;
 `;

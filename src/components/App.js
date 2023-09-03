@@ -1,8 +1,8 @@
+import { useEffect, useState } from 'react';
 import { QuizList } from './QuizList/QuizList';
 // import initialQuizItems from '../data.json';
 import { SearchBar } from './Searchbar/SearchBar';
 import { Layout } from './Layout';
-import { Component } from 'react';
 import { QuizForm } from './QuizForm/QuizForm';
 import { LevelFilter } from './LevelFilter';
 import { TopicFilter } from './TopicFilter';
@@ -16,91 +16,77 @@ const initialFilters = {
 
 const localStorageKey = 'quiz-filters';
 
-export class App extends Component {
-  state = {
-    quizItems: [],
-    filters: initialFilters,
-    loading: false,
-  };
-
-  async componentDidMount() {
-    const savedFilters = localStorage.getItem(localStorageKey);
-    if (savedFilters !== null) {
-      this.setState({ filters: JSON.parse(savedFilters) });
-    }
-    try {
-      this.setState({ loading: true });
-      const quizItems = await fetchQuizzes();
-      this.setState({ quizItems });
-    } catch (error) {
-      console.log(error);
-    } finally {
-      this.setState({ loading: false });
-    }
+const getInitialFilters = () => {
+  const savedFilters = localStorage.getItem(localStorageKey);
+  if (savedFilters !== null) {
+    return JSON.parse(savedFilters);
   }
+  return initialFilters;
+};
 
-  componentDidUpdate(prevProps, prevState) {
-    const { filters: prevFilters } = prevState;
-    const { filters: nextFilters } = this.state;
-    if (prevFilters !== nextFilters) {
-      localStorage.setItem(localStorageKey, JSON.stringify(nextFilters));
+export const App = () => {
+  const [quizItems, setQuizItems] = useState([]);
+  const [filters, setFilters] = useState(getInitialFilters);
+  const [loading, setLoading] = useState(false);
+
+  // Фетч даних з бекенда
+  useEffect(() => {
+    async function getQuizzes() {
+      try {
+        setLoading(true);
+        const quizItems = await fetchQuizzes();
+        setQuizItems(quizItems);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
     }
-  }
+    getQuizzes();
+  }, []);
 
-  changeTopicFilter = newTopic => {
-    this.setState(prevState => {
-      return {
-        filters: {
-          ...prevState.filters,
-          topic: newTopic,
-        },
-      };
-    });
+  // Запис фільтрів в localStorage
+  useEffect(() => {
+    localStorage.setItem(localStorageKey, JSON.stringify(filters));
+  }, [filters]);
+
+  const changeTopicFilter = newTopic => {
+    setFilters(prevState => ({
+      ...prevState,
+      topic: newTopic,
+    }));
   };
 
-  changeLevelFilter = newLevel => {
-    this.setState(prevState => {
-      return {
-        filters: {
-          ...prevState.filters,
-          level: newLevel,
-        },
-      };
-    });
+  const changeLevelFilter = newLevel => {
+    setFilters(prevState => ({
+      ...prevState,
+      level: newLevel,
+    }));
   };
 
-  resetFilters = () => {
-    this.setState({
-      filters: initialFilters,
-    });
-  };
+  const resetFilters = () => setFilters(initialFilters);
 
-  handleDelete = async quizId => {
-    try {
-      const deletedQuiz = await deleteQuiz(quizId);
-      this.setState(prevState => ({
-        quizItems: prevState.quizItems.filter(
-          quiz => quiz.id !== deletedQuiz.id
-        ),
-      }));
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  addQuiz = async newQuiz => {
+  const addQuiz = async newQuiz => {
     try {
       const createdQuiz = await createQuiz(newQuiz);
-      this.setState(prevState => ({
-        quizItems: [...prevState.quizItems, createdQuiz],
-      }));
+      setQuizItems(prevState => [...prevState, createdQuiz]);
     } catch (error) {
       console.log(error);
     }
   };
 
-  getVisibleQuizItems = () => {
-    const { quizItems, filters } = this.state;
+   const deleteQuizzes = async quizId => {
+     try {
+       const deletedQuiz = await deleteQuiz(quizId);
+       setQuizItems(prevState =>
+         prevState.filter(quiz => quiz.id !== deletedQuiz.id)
+       );
+     } catch (error) {
+       console.log(error);
+     }
+   };
+
+  const getVisibleQuizItems = () => {
     const lowerCaseTopic = filters.topic.toLowerCase();
 
     return quizItems.filter(quiz => {
@@ -112,52 +98,33 @@ export class App extends Component {
     });
   };
 
-  render() {
-    const { filters, loading } = this.state;
-    const visibleQuizItems = this.getVisibleQuizItems();
+    // const getVisibleQuizItems = () => {
+    //   const lowerCaseTopic = filters.topic.toLowerCase();
 
-    return (
-      <Layout>
-        <QuizForm onAdd={this.addQuiz} />
-        <SearchBar onResetFilters={this.resetFilters}>
-          <TopicFilter
-            value={filters.topic}
-            onChange={this.changeTopicFilter}
-          />
-          <LevelFilter
-            value={filters.level}
-            onChange={this.changeLevelFilter}
-          />
-        </SearchBar>
-        {loading ? (
-          <div>Loading...</div>
-        ) : (
-          <QuizList items={visibleQuizItems} onDelete={this.handleDelete} />
-        )}
-        <GlobalStyle />
-      </Layout>
-    );
-  }
-}
+    //   return quizItems.filter(quiz => {
+    //     const hasTopic = quiz.topic.toLowerCase().includes(lowerCaseTopic);
+    //     const hasMatchingLevel = quiz.level === filters.level;
+    //     return filters.level === 'all'
+    //       ? hasTopic
+    //       : hasTopic && hasMatchingLevel;
+    //   });
+    // };
 
-// import { HiAcademicCap, HiAdjustments, HiArchive } from 'react-icons/hi';
-// import { IconButton } from './IconButton/IconButton';
+  const visibleQuizItems = getVisibleQuizItems();
 
-// export const App = () => {
-//   return (
-//     <Layout>
-//       <SearchBar />
-//       <QuizList items={quizItems} />
-//       <IconButton variant="primary" size="sm">
-//         <HiAcademicCap />
-//       </IconButton>
-//       <IconButton variant="secondary" size="md">
-//         <HiArchive />
-//       </IconButton>
-//       <IconButton variant="secondary" size="lg">
-//         <HiAdjustments />
-//       </IconButton>
-//       <GlobalStyle />
-//     </Layout>
-//   );
-// };
+  return (
+    <Layout>
+      <QuizForm onAdd={addQuiz} />
+      <SearchBar onResetFilters={resetFilters}>
+        <TopicFilter value={filters.topic} onChange={changeTopicFilter} />
+        <LevelFilter value={filters.level} onChange={changeLevelFilter} />
+      </SearchBar>
+      {loading ? (
+        <div>Loading...</div>
+      ) : (
+        <QuizList items={visibleQuizItems} onDelete={deleteQuizzes} />
+      )}
+      <GlobalStyle />
+    </Layout>
+  );
+};
